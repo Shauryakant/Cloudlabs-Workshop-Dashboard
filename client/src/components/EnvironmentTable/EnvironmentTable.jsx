@@ -40,16 +40,16 @@ export const EnvironmentTable = ({
     <div className="overflow-x-auto">
       <table className="w-full text-left text-xs border-collapse">
         {/* Sticky Table Header */}
-        <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 font-mono text-[11px] uppercase tracking-wider sticky top-[82px] z-10 select-none">
-          <tr>
-            <th className="py-2.5 px-3 font-semibold">Learner</th>
-            <th className="py-2.5 px-3 font-semibold">Environment</th>
-            <th className="py-2.5 px-3 font-semibold">Status</th>
-            <th className="py-2.5 px-3 font-semibold">Progress</th>
-            <th className="py-2.5 px-3 font-semibold">Time on Step</th>
-            <th className="py-2.5 px-3 font-semibold text-right">Runtime</th>
-            <th className="py-2.5 px-3 font-semibold text-right">Spend</th>
-            <th className="py-2.5 px-3 font-semibold text-right">Action</th>
+        <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 font-mono text-[11px] uppercase tracking-wider sticky top-0 z-10 select-none">
+          <tr className="bg-slate-900">
+            <th className="py-2.5 px-3 font-semibold bg-slate-900">Learner</th>
+            <th className="py-2.5 px-3 font-semibold bg-slate-900">Environment</th>
+            <th className="py-2.5 px-3 font-semibold bg-slate-900">Status</th>
+            <th className="py-2.5 px-3 font-semibold bg-slate-900">Progress</th>
+            <th className="py-2.5 px-3 font-semibold bg-slate-900">Time on Step</th>
+            <th className="py-2.5 px-3 font-semibold text-right bg-slate-900">Runtime</th>
+            <th className="py-2.5 px-3 font-semibold text-right bg-slate-900">Spend</th>
+            <th className="py-2.5 px-3 font-semibold text-right bg-slate-900">Action</th>
           </tr>
         </thead>
 
