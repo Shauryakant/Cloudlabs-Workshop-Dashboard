@@ -123,6 +123,44 @@ export const createNewEnvironment = async (environmentData) => {
 };
 
 /**
+ * Reprovision a failed environment.
+ * Validates that the environment exists and is currently in 'failed' status.
+ * Resets status to 'provisioning', clears failure reason, updates provisioning timestamps.
+ *
+ * @param {string} id - Environment _id or environmentId
+ * @returns {Promise<{ error?: string, message?: string, environment?: Object }>}
+ */
+export const reprovisionEnvironment = async (id) => {
+  const environment = await findEnvironmentById(id);
+
+  if (!environment) {
+    return {
+      error: 'NOT_FOUND',
+      message: `Environment with identifier '${id}' not found`,
+    };
+  }
+
+  // Safety check: Only failed environments are allowed to be reprovisioned
+  if (environment.status !== 'failed') {
+    return {
+      error: 'INVALID_STATUS',
+      message: `Cannot reprovision environment in '${environment.status}' status. Only 'failed' environments can be reprovisioned.`,
+    };
+  }
+
+  const now = new Date();
+  environment.status = 'provisioning';
+  environment.failureReason = null;
+  environment.provisionedAt = now;
+  environment.stepStartedAt = now;
+  environment.lastActivityAt = now;
+
+  await environment.save();
+
+  return { environment };
+};
+
+/**
  * Calculate workshop-wide session statistics using MongoDB aggregation pipeline.
  * All computations (counts, spend math, averages) execute in the database.
  *

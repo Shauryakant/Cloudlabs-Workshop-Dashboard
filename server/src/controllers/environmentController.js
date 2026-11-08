@@ -3,6 +3,7 @@ import {
   findEnvironmentById,
   createNewEnvironment,
   getWorkshopSummary,
+  reprovisionEnvironment,
 } from '../services/environmentService.js';
 
 /**
@@ -92,6 +93,40 @@ export const createEnvironment = async (req, res, next) => {
       success: true,
       message: 'Environment created successfully',
       data: environment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Reprovision a failed environment
+ * @route   POST /api/environments/:id/reprovision
+ * @access  Public
+ */
+export const reprovisionEnvironmentHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await reprovisionEnvironment(id);
+
+    if (result.error === 'NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    if (result.error === 'INVALID_STATUS') {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Environment reprovisioning initiated successfully',
+      data: result.environment,
     });
   } catch (error) {
     next(error);
