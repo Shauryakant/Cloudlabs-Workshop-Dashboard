@@ -1,16 +1,24 @@
 import dotenv from 'dotenv';
 import app from './app.js';
 import { connectDB, disconnectDB } from './config/database.js';
+import simulationService from './services/simulationService.js';
 
 // Load environment variables
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
+const ENABLE_SIMULATION = process.env.ENABLE_SIMULATION !== 'false';
+const SIMULATION_INTERVAL_MS = parseInt(process.env.SIMULATION_INTERVAL_MS, 10) || 20000;
 
 // Connect to MongoDB and start the HTTP server
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Start background simulation if enabled
+    if (ENABLE_SIMULATION) {
+      simulationService.startSimulation(SIMULATION_INTERVAL_MS);
+    }
   } catch (error) {
     console.error(`[Server] Failed to connect to database on startup: ${error.message}`);
     console.warn('[Server] Starting server without active MongoDB connection (will retry or serve health checks)');
@@ -25,6 +33,8 @@ const startServer = async () => {
   // Graceful shutdown handling
   const shutdown = async (signal) => {
     console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
+    simulationService.stopSimulation();
+
     server.close(async () => {
       console.log('[Server] HTTP server closed');
       await disconnectDB();
