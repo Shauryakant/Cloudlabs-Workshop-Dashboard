@@ -2,6 +2,7 @@ import {
   queryEnvironments,
   findEnvironmentById,
   createNewEnvironment,
+  getWorkshopSummary,
 } from '../services/environmentService.js';
 
 /**
@@ -54,6 +55,24 @@ export const getEnvironmentById = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: environment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get aggregated session summary statistics
+ * @route   GET /api/environments/summary
+ * @access  Public
+ */
+export const getEnvironmentSummary = async (req, res, next) => {
+  try {
+    const summary = await getWorkshopSummary();
+
+    res.status(200).json({
+      success: true,
+      data: summary,
     });
   } catch (error) {
     next(error);
