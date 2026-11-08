@@ -1,19 +1,33 @@
-import mongoose from 'mongoose';
-import Environment from '../models/Environment.js';
+import {
+  queryEnvironments,
+  findEnvironmentById,
+  createNewEnvironment,
+} from '../services/environmentService.js';
 
 /**
- * @desc    Get all environments (basic retrieval for Phase 1)
+ * @desc    Get all environments with pagination, filtering, search, and sorting
  * @route   GET /api/environments
  * @access  Public
+ * @query   page, limit, status, search, sort, order
  */
 export const getAllEnvironments = async (req, res, next) => {
   try {
-    const environments = await Environment.find().sort({ createdAt: -1 });
+    const { page, limit, status, search, sort, order } = req.query;
+
+    const result = await queryEnvironments({
+      page,
+      limit,
+      status,
+      search,
+      sort,
+      order,
+    });
 
     res.status(200).json({
       success: true,
-      count: environments.length,
-      data: environments,
+      count: result.environments.length,
+      pagination: result.pagination,
+      data: result.environments,
     });
   } catch (error) {
     next(error);
@@ -21,22 +35,14 @@ export const getAllEnvironments = async (req, res, next) => {
 };
 
 /**
- * @desc    Get environment by ID (supports MongoDB _id or environmentId)
+ * @desc    Get environment by ID (MongoDB _id or environmentId)
  * @route   GET /api/environments/:id
  * @access  Public
  */
 export const getEnvironmentById = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    let environment;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      environment = await Environment.findById(id);
-    }
-
-    if (!environment) {
-      environment = await Environment.findOne({ environmentId: id });
-    }
+    const environment = await findEnvironmentById(id);
 
     if (!environment) {
       return res.status(404).json({
@@ -61,37 +67,7 @@ export const getEnvironmentById = async (req, res, next) => {
  */
 export const createEnvironment = async (req, res, next) => {
   try {
-    const {
-      learnerId,
-      learnerName,
-      email,
-      environmentId,
-      status,
-      currentStep,
-      totalSteps,
-      stepStartedAt,
-      lastActivityAt,
-      provisionedAt,
-      runtimeMinutes,
-      hourlyRate,
-      failureReason,
-    } = req.body;
-
-    const environment = await Environment.create({
-      learnerId,
-      learnerName,
-      email,
-      environmentId,
-      status,
-      currentStep,
-      totalSteps,
-      stepStartedAt,
-      lastActivityAt,
-      provisionedAt,
-      runtimeMinutes,
-      hourlyRate,
-      failureReason,
-    });
+    const environment = await createNewEnvironment(req.body);
 
     res.status(201).json({
       success: true,
