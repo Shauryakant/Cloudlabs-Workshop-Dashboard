@@ -121,3 +121,90 @@ export const findEnvironmentById = async (id) => {
 export const createNewEnvironment = async (environmentData) => {
   return Environment.create(environmentData);
 };
+
+/**
+ * Calculate workshop-wide session statistics using MongoDB aggregation pipeline.
+ * All computations (counts, spend math, averages) execute in the database.
+ *
+ * @returns {Promise<Object>} Aggregated session summary
+ */
+export const getWorkshopSummary = async () => {
+  const result = await Environment.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalLearners: { $sum: 1 },
+        provisioningCount: {
+          $sum: { $cond: [{ $eq: ['$status', 'provisioning'] }, 1, 0] },
+        },
+        readyCount: {
+          $sum: { $cond: [{ $eq: ['$status', 'ready'] }, 1, 0] },
+        },
+        inUseCount: {
+          $sum: { $cond: [{ $eq: ['$status', 'in_use'] }, 1, 0] },
+        },
+        failedCount: {
+          $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] },
+        },
+        deprovisionedCount: {
+          $sum: { $cond: [{ $eq: ['$status', 'deprovisioned'] }, 1, 0] },
+        },
+        totalEstimatedSpend: {
+          $sum: {
+            $multiply: [
+              { $divide: [{ $ifNull: ['$runtimeMinutes', 0] }, 60] },
+              { $ifNull: ['$hourlyRate', 0] },
+            ],
+          },
+        },
+        averageRuntimeMinutes: {
+          $avg: { $ifNull: ['$runtimeMinutes', 0] },
+        },
+        averageCompletionPercentage: {
+          $avg: {
+            $multiply: [
+              {
+                $divide: [
+                  { $ifNull: ['$currentStep', 0] },
+                  { $cond: [{ $gt: ['$totalSteps', 0] }, '$totalSteps', 1] },
+                ],
+              },
+              100,
+            ],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalLearners: 1,
+        provisioningCount: 1,
+        readyCount: 1,
+        inUseCount: 1,
+        failedCount: 1,
+        deprovisionedCount: 1,
+        totalEstimatedSpend: { $round: ['$totalEstimatedSpend', 2] },
+        averageRuntimeMinutes: { $round: ['$averageRuntimeMinutes', 1] },
+        averageCompletionPercentage: { $round: ['$averageCompletionPercentage', 1] },
+      },
+    },
+  ]);
+
+  // Handle empty database case gracefully with sensible zeroes
+  if (!result || result.length === 0) {
+    return {
+      totalLearners: 0,
+      provisioningCount: 0,
+      readyCount: 0,
+      inUseCount: 0,
+      failedCount: 0,
+      deprovisionedCount: 0,
+      totalEstimatedSpend: 0,
+      averageRuntimeMinutes: 0,
+      averageCompletionPercentage: 0,
+    };
+  }
+
+  return result[0];
+};
