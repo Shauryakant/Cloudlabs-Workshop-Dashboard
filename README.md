@@ -178,24 +178,6 @@ npm run dev
 
 Open your browser at **`http://localhost:5173`**.
 
----
-
-## 🌐 Production Deployment Guide
-
-The application is structured to support both separate frontend/backend deployments and single-container monolithic deployment.
-
-### Option A: Render.com / Railway (Single Service)
-Because `server/src/app.js` contains production static asset serving:
-1. Build script: `npm run build` (builds `client/dist`).
-2. Start command: `npm start` (starts `server/src/server.js`).
-3. Set environment variables (`MONGODB_URI`, `GROQ_API_KEY`, `NODE_ENV=production`).
-4. Express will serve the React SPA directly from `client/dist` and proxy all `/api` calls internally.
-
-### Option B: Separate Frontend (Vercel) & Backend (Render/Railway)
-1. Deploy `server/` to Render/Railway. Set environment variables.
-2. Deploy `client/` to Vercel/Netlify. Set `VITE_API_BASE_URL` to your live backend URL.
-
----
 
 ## 📡 API Reference Documentation
 
