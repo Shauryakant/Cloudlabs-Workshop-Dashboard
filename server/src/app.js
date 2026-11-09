@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import environmentRoutes from './routes/environmentRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -21,6 +22,7 @@ app.get('/api/health', (req, res) => {
 
 // Mount Routes
 app.use('/api/environments', environmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error Handling Middleware
 app.use(notFoundHandler);
