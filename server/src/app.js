@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import environmentRoutes from './routes/environmentRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
@@ -29,9 +30,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/environments', environmentRoutes);
 app.use('/api/ai', aiRoutes);
 
-// Production Static Asset Serving (Single-container / PaaS Deployment)
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.resolve(__dirname, '../../client/dist');
+// Production Static Asset Serving (Serves frontend when client/dist exists)
+const distPath = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(distPath)) {
+  console.log(`[Server] Serving production frontend from: ${distPath}`);
   app.use(express.static(distPath));
 
   app.get('*', (req, res, next) => {
@@ -40,6 +42,8 @@ if (process.env.NODE_ENV === 'production') {
     }
     res.sendFile(path.join(distPath, 'index.html'));
   });
+} else {
+  console.warn(`[Server] Frontend build directory not found at: ${distPath}`);
 }
 
 // Error Handling Middleware
