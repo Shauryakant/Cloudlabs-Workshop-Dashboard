@@ -34,6 +34,29 @@ class SimulationService {
       this.lastTickAt = new Date();
       const events = [];
 
+      // Check current counts to maintain operational equilibrium
+      const [failedCount, inUseCount, provisioningCount] = await Promise.all([
+        Environment.countDocuments({ status: 'failed' }),
+        Environment.countDocuments({ status: 'in_use' }),
+        Environment.countDocuments({ status: 'provisioning' }),
+      ]);
+
+      // 0. Equilibrium Guardrail: Replenish active pool if in_use drops below 70
+      if (inUseCount < 70 && provisioningCount < 6) {
+        const finishedEnvs = await Environment.find({ status: 'deprovisioned' }).limit(2);
+        for (const env of finishedEnvs) {
+          env.status = 'provisioning';
+          env.currentStep = 0;
+          env.runtimeMinutes = 0;
+          env.provisionedAt = null;
+          env.stepStartedAt = new Date();
+          env.lastActivityAt = new Date();
+          env.failureReason = null;
+          await env.save();
+          events.push(`Recycled ${env.learnerName} (${env.environmentId}) -> provisioning`);
+        }
+      }
+
       // 1. Advance runtime for all active 'in_use' environments (+1 minute per tick)
       const runtimeUpdate = await Environment.updateMany(
         { status: 'in_use' },
@@ -71,17 +94,17 @@ class SimulationService {
         }
       }
 
-      // 4. Progress active learners through steps (~25% chance for up to 5 learners)
+      // 4. Progress active learners through steps
       const activeEnvs = await Environment.find({ status: 'in_use' }).limit(10);
       for (const env of activeEnvs) {
-        // Skip deliberately stuck learners (e.g. learner IDs ending in 018 or 038) to keep them visible
+        // Preserve designated stuck learners (ending in 018 or 038) for instructor visibility
         if (env.learnerId.endsWith('018') || env.learnerId.endsWith('038')) {
           continue;
         }
 
         const rand = Math.random();
 
-        // 20% chance to advance step
+        // Step progression
         if (rand < 0.20 && env.currentStep < env.totalSteps) {
           env.currentStep += 1;
           env.stepStartedAt = new Date();
@@ -89,15 +112,15 @@ class SimulationService {
           await env.save();
           events.push(`${env.learnerName} advanced to step ${env.currentStep}`);
         }
-        // 10% chance to finish workshop if on final step
-        else if (rand < 0.30 && env.currentStep >= env.totalSteps) {
+        // Workshop completion: Only deprovision if active pool is healthy (>= 65)
+        else if (rand < 0.25 && env.currentStep >= env.totalSteps && inUseCount >= 65) {
           env.status = 'deprovisioned';
           env.lastActivityAt = new Date();
           await env.save();
           events.push(`${env.learnerName} completed workshop -> deprovisioned`);
         }
-        // Very rare 1.5% chance of realistic Azure failure on active environments
-        else if (rand > 0.985) {
+        // Failure guardrail: Max 8 simultaneous failures allowed in workshop
+        else if (rand > 0.985 && failedCount < 8) {
           env.status = 'failed';
           env.failureReason =
             SIMULATION_FAILURE_REASONS[
