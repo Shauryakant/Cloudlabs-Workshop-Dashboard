@@ -4,23 +4,10 @@
 
 ---
 
-## 🎥 Demo Video Walkthrough
+## 🎥 Demo Video
 
-<!-- ======================================================== -->
-<!-- RECORDING LINK PLACEHOLDER: Paste your Loom/YouTube URL below -->
-<!-- ======================================================== -->
-
-[![CloudLabs Dashboard Demo Walkthrough](https://img.shields.io/badge/Demo_Video-Watch_Walkthrough-blue?style=for-the-badge&logo=youtube)](YOUR_DEMO_VIDEO_LINK_HERE)
-
-> **Video Link**: `YOUR_DEMO_VIDEO_LINK_HERE`  
-> *(Replace the link above with your 60–90s demo recording link)*
-
-### 60–90 Second Demo Script / Checklist:
-1. **0:00 - 0:15 (Session Overview)**: Point out the dense top command bar showing all 120 learners, live state distribution (in-use, failed, provisioning, ready, done), real-time spend ($218+), and average workshop completion.
-2. **0:15 - 0:30 (Scanning & Stuck Learners)**: Show the dense table and explain that learners on a step for $\ge$ 20 minutes are flagged with an amber badge (`⏱ 28m on step (Stuck)`).
-3. **0:30 - 0:45 (Reprovisioning State Mutation)**: Click the "Failed" filter tab to isolate failures. Click the **"Reprovision"** button on a failed Azure VM. Show its status turn into `provisioning`, failure message clear, and session counters reactively decrement.
-4. **0:45 - 1:15 (Grounded AI Natural Language Filter)**: Click or type *"Show everyone stuck on step 4 for over 20 min"*. Show the active filter banner with LLM explanation. Next, type an off-topic query like *"What is the weather?"* to show how the grounded safety boundary politely rejects non-telemetry requests.
-5. **1:15 - 1:30 (Live Drift & Polling)**: Show the live polling indicator pulsing every 6 seconds as background simulation subtly advances runtime and steps without page reloads.
+- **Live Deployed Dashboard**: [https://cloudlabs-workshop-dashboard.onrender.com](https://cloudlabs-workshop-dashboard.onrender.com)
+- **Demo Video Link**: [Watch the Walkthrough Video](YOUR_DEMO_VIDEO_LINK_HERE)
 
 ---
 
