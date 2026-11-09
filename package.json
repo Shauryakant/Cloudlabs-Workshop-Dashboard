@@ -1,0 +1,26 @@
+{
+  "name": "cloudlabs-workshop-operations-dashboard",
+  "version": "1.0.0",
+  "description": "Production-grade CloudLabs Workshop Operations Dashboard",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "seed": "npm --prefix server run seed",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server run start"
+  },
+  "keywords": [
+    "azure",
+    "cloudlabs",
+    "dashboard",
+    "monitoring",
+    "mongodb",
+    "express",
+    "react",
+    "groq",
+    "operations"
+  ],
+  "author": "Shauryakant",
+  "license": "ISC"
+}

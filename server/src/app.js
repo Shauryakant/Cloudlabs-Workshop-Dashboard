@@ -1,8 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import environmentRoutes from './routes/environmentRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorMiddleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -20,9 +25,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount Routes
+// Mount API Routes
 app.use('/api/environments', environmentRoutes);
 app.use('/api/ai', aiRoutes);
+
+// Production Static Asset Serving (Single-container / PaaS Deployment)
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.resolve(__dirname, '../../client/dist');
+  app.use(express.static(distPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // Error Handling Middleware
 app.use(notFoundHandler);
