@@ -39,4 +39,12 @@ export const reprovisionEnvironment = async (id) => {
   return response.data;
 };
 
+/**
+ * Execute natural language filter via Groq AI
+ */
+export const executeAiFilter = async (query) => {
+  const response = await apiClient.post('/ai/filter', { query });
+  return response.data;
+};
+
 export default apiClient;
